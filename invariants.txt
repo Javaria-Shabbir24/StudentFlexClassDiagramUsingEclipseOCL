@@ -1,0 +1,207 @@
+context Student
+inv:
+    course.transcript->select(course | course.transcript.grade = 'F') or course.ImproveCourseGrade=true implies
+    self.repeatCourse( )=true
+      
+
+context Student
+     self.fee.accounts_office.issueBankChallan()=true 
+     implies payFee()=true
+
+
+context Student
+inv:
+    course.transcript->select(course | course.transcript.grade = 'F')
+    self.repeatCourse( )=true
+
+
+context Semester
+inv:
+    self.name = 'Fall' or self.name = 'Spring' or self.name = 'Summer'
+
+
+context Student
+inv:
+    self.isEnrolled() and
+    Department.allInstances()->includes(department) and
+    Semester.allInstances()->includes(semester) and
+    self.viewCourseList()=true
+
+
+context Student
+    warning.warningCount>0 
+    implies self.getApprovalForRegistration()=true
+
+
+context Student
+inv:
+    semester->size() > 0 implies
+        warning.warningCount = warning.warningCount+ 
+            (if self.CGPA < warning.minimumCGPA then 1 
+            	else 0
+            	 endif
+            )
+
+context Student
+inv:
+    warning.warningCount>= 0 implies viewWarningCount=true
+
+
+context Student
+inv:
+    if(warning.warningCount = 3 implies self.registered=false)
+    if self.CGPA >= warningminimumCGPA implies self.warningCount = 0)
+
+
+context Student
+inv:
+    self.yearsEnrolled <= warning.maxDurationYears
+
+context Student
+inv:
+    self.courses->includes(course) and
+    course.registrationDate + 14 <= self.currentDate
+
+
+context Student
+inv:
+ canAppearInExam( ) : self.fees->forAll(f : Fee | f.isPaid or self.getApprovalByHOD())
+
+
+context Student
+inv:
+  self.fee.viewFeeDetails() = true
+
+context Student
+inv MaintainScholarship:
+  self.scholarship.type='awardScholarship' implies
+  self.semesters->forAll(s | s.CGPA >= 3.00)
+
+
+context Result
+inv:
+  self.student.viewResults() = true
+
+context Result
+inv :
+  self.isAnnounced=true implies self.student.applyForGradeChange = true
+
+context Result
+ inv:
+  self.student.requestExamRetake() implies self.approvedByHOD = true
+
+
+context Fee
+inv: 
+       self.dueDate = self.student.semester.startDate - 14
+
+
+context Fee:
+inv:
+ isRefundable implies self.type = FeeType::SecurityDeposit 
+
+
+context Transcript
+inv:
+    course->forAll(course | course.status = 'R' implies self.repeatCount)
+
+
+context Transcript
+student.semester->collect(semester | student.semester.GPA)->sum() / student.semester->size()
+
+
+context Transcript
+inv:
+   course.status='withdrawn' implies self.grade='W''
+
+
+context Transcript
+inv:
+    self.courseID->forAll(course | not course.status='dropped'')
+
+
+context Attendance
+inv:
+self.student.registered=true implies
+  self.student.viewAttendance() = true
+
+context Attendance
+inv:
+  self.presencePercentage > 80 implies self.student.eligibleForFinal = true
+
+
+context Loan
+inv:
+self.student.isIndigent = true implies
+  self.student.applyForLoan() = true
+
+
+
+context Loan
+inv:
+  
+  self.loanAmount = self.student.fee='tuitionFee'
+  
+  if self.student.degreeType = 'Undergraduate' then
+    self.student.CGPA >= 2.00
+  else
+    self.student.CGPA >= 2.5
+  endif
+  self.repaymentStart = min(self.student.graduationDate + (3.months) or self.student.employmentDate + (3.months))
+  self.student.graduationDate + 4.years) >= self.repaymentStart
+  self.student.applyForLoan() = true
+
+
+
+context Scholarship
+inv AwardToTopThreeInNUList:
+  self.student.admissionPosition->notEmpty() and
+  self.student.admissionPosition <= 3 implies
+  self.type = 'NU Merit Scholarship'
+
+
+context Scholarship
+inv AwardToTopThreeInBoard:
+  self.student.boardPosition->notEmpty() and
+  self.student.boardPosition <= 3 implies
+  self.type = 'Merit Scholarship'
+
+
+context Student
+inv:
+   if self.BS then
+    self.course.transcript->select(course | course.transcript.grade = 'C' or course.transcript.grade = 'C-')->
+    exists(course | course.gpa < 2.00)
+else if self.MS then
+    self.course.transcript->select(course | course.transcript.grade = 'C' or course.transcript.grade = 'C-')->
+    exists(course | course.gpa < 2.50)
+endif
+
+
+context Warning
+inv:
+    student.CGPA < self.minimumCGPA implies self.IssueWarning()=true
+
+
+if self.programType = 'BS' then
+        self.registeredCourses->size() <= 5
+    else if self.programType= 'MS' then
+        self.registeredCourses->size() <= 3
+    endif
+    and self.registeredCourses->forAll(course | 
+        not course.prerequisites->exists(prereq | not self.coursesTaken->includes(prereq))
+    )
+
+
+
+context Student
+inv: 
+    self.coreCoursesTaken->forAll(course | course.isRequired) and 
+    self.electiveCoursesTaken->forAll(course | not course.isRequired)
+
+
+
+context Student
+inv:
+    course.withdrawalDate <> null implies course.withdrawalDate > Date.today()
+

@@ -1,0 +1,710 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<uml:Model xmi:version="20131001" xmlns:xmi="http://www.omg.org/spec/XMI/20131001" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" xmlns:uml="http://www.eclipse.org/uml2/5.0.0/UML" xmi:id="_Tl7hsAkcEe-S5ZRQeQ48cw" name="FinalProject" visibility="protected">
+  <ownedRule xmi:type="uml:Constraint" xmi:id="_eebaIAptEe-_z7ONgUI60A" name="RepeatCount_13">
+    <specification xmi:type="uml:OpaqueExpression" xmi:id="_eecBMAptEe-_z7ONgUI60A" name="constraintSpec">
+      <language>OCL</language>
+      <body>context Transcript&#xD;
+inv:&#xD;
+    course->forAll(course | course.status = 'R' implies self.repeatCount)</body>
+    </specification>
+  </ownedRule>
+  <ownedRule xmi:type="uml:Constraint" xmi:id="_8O0-AAsAEe-5HOH-_imbQQ" name="CanAppearInExam_24">
+    <specification xmi:type="uml:OpaqueExpression" xmi:id="_8O2zMAsAEe-5HOH-_imbQQ" name="constraintSpec">
+      <language>OCL</language>
+      <body>context Student&#xD;
+inv:&#xD;
+ canAppearInExam( ) : self.fees->forAll(f : Fee | f.isPaid or self.getApprovalByHOD())</body>
+    </specification>
+  </ownedRule>
+  <packageImport xmi:type="uml:PackageImport" xmi:id="_TsOW8AkcEe-S5ZRQeQ48cw">
+    <importedPackage xmi:type="uml:Model" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#_0"/>
+  </packageImport>
+  <packagedElement xmi:type="uml:Class" xmi:id="_fl1CMAkcEe-S5ZRQeQ48cw" name="Student" visibility="package">
+    <ownedRule xmi:type="uml:Constraint" xmi:id="_ySWTQAk-Ee-my72Ts2K-1A" name="viewCourseList_1" visibility="public">
+      <specification xmi:type="uml:OpaqueExpression" xmi:id="_ySZWkAk-Ee-my72Ts2K-1A" name="constraintSpec">
+        <language>OCL</language>
+        <body>context Student&#xD;
+inv:&#xD;
+    self.isEnrolled() and&#xD;
+    Department.allInstances()->includes(department) and&#xD;
+    Semester.allInstances()->includes(semester) and&#xD;
+    self.viewCourseList()=true</body>
+      </specification>
+    </ownedRule>
+    <ownedRule xmi:type="uml:Constraint" xmi:id="_8MHH0AppEe-_z7ONgUI60A" name="CourseRegistration_4">
+      <specification xmi:type="uml:OpaqueExpression" xmi:id="_8MIV8AppEe-_z7ONgUI60A" name="constraintSpec">
+        <language>OCL</language>
+        <body>if self.programType = 'BS' then&#xD;
+        self.registeredCourses->size() &lt;= 5&#xD;
+    else if self.programType= 'MS' then&#xD;
+        self.registeredCourses->size() &lt;= 3&#xD;
+    endif&#xD;
+    and self.registeredCourses->forAll(course | &#xD;
+        not course.prerequisites->exists(prereq | not self.coursesTaken->includes(prereq))&#xD;
+    )</body>
+      </specification>
+    </ownedRule>
+    <ownedRule xmi:type="uml:Constraint" xmi:id="_QD05IApqEe-_z7ONgUI60A" name="WithdrawCourse_5">
+      <specification xmi:type="uml:OpaqueExpression" xmi:id="_QD2HQApqEe-_z7ONgUI60A" name="constraintSpec">
+        <language>OCL</language>
+        <body>context Student&#xD;
+inv:&#xD;
+    course.withdrawalDate &lt;> null implies course.withdrawalDate > Date.today()&#xD;
+&#xD;
+</body>
+      </specification>
+    </ownedRule>
+    <ownedRule xmi:type="uml:Constraint" xmi:id="_yhg1UApqEe-_z7ONgUI60A" name="DropCourse_7">
+      <specification xmi:type="uml:OpaqueExpression" xmi:id="_yhhcYApqEe-_z7ONgUI60A" name="constraintSpec">
+        <language>OCL</language>
+        <body>context Student&#xD;
+inv:&#xD;
+    self.courses->includes(course) and&#xD;
+    course.registrationDate + 14 &lt;= self.currentDate&#xD;
+</body>
+      </specification>
+    </ownedRule>
+    <ownedRule xmi:type="uml:Constraint" xmi:id="_pLFmkApsEe-_z7ONgUI60A" name="RepeatFailedCourses_10">
+      <specification xmi:type="uml:OpaqueExpression" xmi:id="_pLHbwApsEe-_z7ONgUI60A" name="constraintSpec">
+        <language>OCL</language>
+        <body>context Student&#xD;
+inv:&#xD;
+    course.transcript->select(course | course.transcript.grade = 'F')&#xD;
+    self.repeatCourse( )=true&#xD;
+</body>
+      </specification>
+    </ownedRule>
+    <ownedRule xmi:type="uml:Constraint" xmi:id="_Bivt8AptEe-_z7ONgUI60A" name="WarningCourses_11">
+      <specification xmi:type="uml:OpaqueExpression" xmi:id="_Biw8EAptEe-_z7ONgUI60A" name="constraintSpec">
+        <language>OCL</language>
+        <body>context Student&#xD;
+inv:&#xD;
+   if self.BS then&#xD;
+    self.course.transcript->select(course | course.transcript.grade = 'C' or course.transcript.grade = 'C-')->&#xD;
+    exists(course | course.gpa &lt; 2.00)&#xD;
+else if self.MS then&#xD;
+    self.course.transcript->select(course | course.transcript.grade = 'C' or course.transcript.grade = 'C-')->&#xD;
+    exists(course | course.gpa &lt; 2.50)&#xD;
+endif</body>
+      </specification>
+    </ownedRule>
+    <ownedRule xmi:type="uml:Constraint" xmi:id="_TELkYAptEe-_z7ONgUI60A" name="RepeatCourses_12">
+      <specification xmi:type="uml:OpaqueExpression" xmi:id="_TENZkAptEe-_z7ONgUI60A" name="constraintSpec">
+        <language>OCL</language>
+        <body>context Student&#xD;
+inv:&#xD;
+    course.transcript->select(course | course.transcript.grade = 'F') or course.ImproveCourseGrade=true implies&#xD;
+    self.repeatCourse( )=true&#xD;
+      </body>
+      </specification>
+    </ownedRule>
+    <ownedRule xmi:type="uml:Constraint" xmi:id="_siHXUAptEe-_z7ONgUI60A" name="ViewWarningStatus_14">
+      <specification xmi:type="uml:OpaqueExpression" xmi:id="_siIlcAptEe-_z7ONgUI60A" name="constraintSpec">
+        <language>OCL</language>
+        <body>context Student&#xD;
+inv:&#xD;
+    warning.warningCount>= 0 implies viewWarningCount=true</body>
+      </specification>
+    </ownedRule>
+    <ownedRule xmi:type="uml:Constraint" xmi:id="_APRecApuEe-_z7ONgUI60A" name="HODApprovalForRegistration_16">
+      <specification xmi:type="uml:OpaqueExpression" xmi:id="_APSskApuEe-_z7ONgUI60A" name="constraintSpec">
+        <language>OCL</language>
+        <body>context Student&#xD;
+    warning.warningCount>0 &#xD;
+    implies self.getApprovalForRegistration()=true&#xD;
+</body>
+      </specification>
+    </ownedRule>
+    <ownedRule xmi:type="uml:Constraint" xmi:id="_OhwsoApuEe-_z7ONgUI60A" name="WarningCount_17">
+      <specification xmi:type="uml:OpaqueExpression" xmi:id="_Ohx6wApuEe-_z7ONgUI60A" name="constraintSpec">
+        <language>OCL</language>
+        <body>context Student&#xD;
+inv:&#xD;
+    semester->size() > 0 implies&#xD;
+        warning.warningCount = warning.warningCount+ &#xD;
+            (if self.CGPA &lt; warning.minimumCGPA then 1 &#xD;
+            	else 0&#xD;
+            	 endif&#xD;
+            )</body>
+      </specification>
+    </ownedRule>
+    <ownedRule xmi:type="uml:Constraint" xmi:id="_eKRSkApuEe-_z7ONgUI60A" name="WarningCountandAdmission_18">
+      <specification xmi:type="uml:OpaqueExpression" xmi:id="_eKTHwApuEe-_z7ONgUI60A" name="constraintSpec">
+        <language>OCL</language>
+        <body>context Student&#xD;
+inv:&#xD;
+    if(warning.warningCount = 3 implies self.registered=false)&#xD;
+    if self.CGPA >= warningminimumCGPA implies self.warningCount = 0)</body>
+      </specification>
+    </ownedRule>
+    <ownedRule xmi:type="uml:Constraint" xmi:id="_kZAFsApuEe-_z7ONgUI60A" name="Admission_19">
+      <specification xmi:type="uml:OpaqueExpression" xmi:id="_kZAswApuEe-_z7ONgUI60A" name="constraintSpec">
+        <language>OCL</language>
+        <body>context Student&#xD;
+inv:&#xD;
+    self.yearsEnrolled &lt;= warning.maxDurationYears</body>
+      </specification>
+    </ownedRule>
+    <ownedRule xmi:type="uml:Constraint" xmi:id="_xxbLAAsAEe-5HOH-_imbQQ" name="ViewFeeDetails_20">
+      <specification xmi:type="uml:OpaqueExpression" xmi:id="_xxk8AAsAEe-5HOH-_imbQQ" name="constraintSpec">
+        <language>OCL</language>
+        <body>context Student&#xD;
+inv:&#xD;
+  self.fee.viewFeeDetails() = true</body>
+      </specification>
+    </ownedRule>
+    <ownedRule xmi:type="uml:Constraint" xmi:id="_UCfAcAsBEe-5HOH-_imbQQ" name="ScholarshipMaintainence_34">
+      <specification xmi:type="uml:OpaqueExpression" xmi:id="_UCgOkAsBEe-5HOH-_imbQQ" name="constraintSpec">
+        <language>OCL</language>
+        <body>context Student&#xD;
+inv MaintainScholarship:&#xD;
+  self.scholarship.type='awardScholarship' implies&#xD;
+  self.semesters->forAll(s | s.CGPA >= 3.00)</body>
+      </specification>
+    </ownedRule>
+    <ownedRule xmi:type="uml:Constraint" xmi:id="_tcIv4At7Ee-pa64IpdH6Iw" name="CoreCourses_3">
+      <specification xmi:type="uml:OpaqueExpression" xmi:id="_tcfVMAt7Ee-pa64IpdH6Iw" name="constraintSpec">
+        <language>OCL</language>
+        <body>context Student&#xD;
+inv: &#xD;
+    self.coreCoursesTaken->forAll(course | course.isRequired) and &#xD;
+    self.electiveCoursesTaken->forAll(course | not course.isRequired)</body>
+      </specification>
+    </ownedRule>
+    <ownedRule xmi:type="uml:Constraint" xmi:id="_-KM-8AuXEe-pa64IpdH6Iw" name="PayFeeInBank_22">
+      <specification xmi:type="uml:OpaqueExpression" xmi:id="_-KNmAAuXEe-pa64IpdH6Iw" name="constraintSpec">
+        <language>OCL</language>
+        <body>context Student&#xD;
+     self.fee.accounts_office.issueBankChallan()=true &#xD;
+     implies payFee()=true</body>
+      </specification>
+    </ownedRule>
+    <ownedAttribute xmi:type="uml:Property" xmi:id="_DzhcEAkgEe-S5ZRQeQ48cw" name="studentID" visibility="private" aggregation="composite">
+      <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+    </ownedAttribute>
+    <ownedAttribute xmi:type="uml:Property" xmi:id="_eS6E8AkgEe-S5ZRQeQ48cw" name="name" visibility="private">
+      <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+    </ownedAttribute>
+    <ownedAttribute xmi:type="uml:Property" xmi:id="_e1J2YAkgEe-S5ZRQeQ48cw" name="CGPA" visibility="private">
+      <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/EcorePrimitiveTypes.library.uml#EFloat"/>
+      <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_AUALwAkhEe-S5ZRQeQ48cw" value="*"/>
+    </ownedAttribute>
+    <ownedAttribute xmi:type="uml:Property" xmi:id="_iB4REAkgEe-S5ZRQeQ48cw" name="warningCount" visibility="private" aggregation="composite">
+      <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Integer"/>
+      <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_8RjqAAkgEe-S5ZRQeQ48cw" value="*"/>
+      <defaultValue xmi:type="uml:LiteralInteger" xmi:id="_IpKN8AkjEe-S5ZRQeQ48cw" value="3"/>
+    </ownedAttribute>
+    <ownedAttribute xmi:type="uml:Property" xmi:id="_gekRMAsCEe-5HOH-_imbQQ" name="eligibleForfinal" visibility="private">
+      <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Boolean"/>
+    </ownedAttribute>
+    <ownedAttribute xmi:type="uml:Property" xmi:id="_mOYTsAsCEe-5HOH-_imbQQ" name="requestToRetakeExam" visibility="private" aggregation="composite">
+      <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Boolean"/>
+    </ownedAttribute>
+    <ownedAttribute xmi:type="uml:Property" xmi:id="_rd_MIAsCEe-5HOH-_imbQQ" name="boardposition" visibility="private">
+      <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+    </ownedAttribute>
+    <ownedAttribute xmi:type="uml:Property" xmi:id="_vCbjQAsCEe-5HOH-_imbQQ" name="admissionPosition" visibility="private" aggregation="composite">
+      <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+    </ownedAttribute>
+    <ownedAttribute xmi:type="uml:Property" xmi:id="_AgptMAt9Ee-pa64IpdH6Iw" name="programType" visibility="private">
+      <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+    </ownedAttribute>
+    <ownedAttribute xmi:type="uml:Property" xmi:id="_1AJMgAt-Ee-pa64IpdH6Iw" name="registeredCourses" visibility="private" aggregation="composite">
+      <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Integer"/>
+    </ownedAttribute>
+    <ownedAttribute xmi:type="uml:Property" xmi:id="_UwSmkAuOEe-pa64IpdH6Iw" name="registered" visibility="private">
+      <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Boolean"/>
+    </ownedAttribute>
+    <ownedAttribute xmi:type="uml:Property" xmi:id="_hCvPoAuOEe-pa64IpdH6Iw" name="yearsEnrolled" visibility="private">
+      <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Integer"/>
+      <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_lw3ysAuOEe-pa64IpdH6Iw" value="*"/>
+    </ownedAttribute>
+    <ownedAttribute xmi:type="uml:Property" xmi:id="_di2qkAudEe-pa64IpdH6Iw" name="degreeType" visibility="private">
+      <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+    </ownedAttribute>
+    <ownedAttribute xmi:type="uml:Property" xmi:id="_9jadAAudEe-pa64IpdH6Iw" name="employementDate" visibility="private">
+      <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/EcorePrimitiveTypes.library.uml#EDate"/>
+    </ownedAttribute>
+    <ownedAttribute xmi:type="uml:Property" xmi:id="_CM0REAueEe-pa64IpdH6Iw" name="graduationDate" visibility="private" aggregation="composite">
+      <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/EcorePrimitiveTypes.library.uml#EDate"/>
+    </ownedAttribute>
+    <ownedOperation xmi:type="uml:Operation" xmi:id="_flppwAkhEe-S5ZRQeQ48cw" name="viewCourseList"/>
+    <ownedOperation xmi:type="uml:Operation" xmi:id="_jv_jQAkhEe-S5ZRQeQ48cw" name="registerCourse"/>
+    <ownedOperation xmi:type="uml:Operation" xmi:id="_mkdO8AkhEe-S5ZRQeQ48cw" name="withdrawCourse"/>
+    <ownedOperation xmi:type="uml:Operation" xmi:id="_oq9BYAkhEe-S5ZRQeQ48cw" name="dropCourse"/>
+    <ownedOperation xmi:type="uml:Operation" xmi:id="_rHofMAkhEe-S5ZRQeQ48cw" name="viewWarningStatus"/>
+    <ownedOperation xmi:type="uml:Operation" xmi:id="_saIB0AkhEe-S5ZRQeQ48cw" name="applyForLoan"/>
+    <ownedOperation xmi:type="uml:Operation" xmi:id="_te-KAAkhEe-S5ZRQeQ48cw" name="viewAttendance"/>
+    <ownedOperation xmi:type="uml:Operation" xmi:id="_xQXYAAkhEe-S5ZRQeQ48cw" name="viewResults"/>
+    <ownedOperation xmi:type="uml:Operation" xmi:id="_ypwM0AkhEe-S5ZRQeQ48cw" name="applyForGradeChange"/>
+    <ownedOperation xmi:type="uml:Operation" xmi:id="_0J2toAkhEe-S5ZRQeQ48cw" name="requestExamRetake"/>
+    <ownedOperation xmi:type="uml:Operation" xmi:id="_8dCH8AklEe-S5ZRQeQ48cw" name="login"/>
+    <ownedOperation xmi:type="uml:Operation" xmi:id="__pbLcAklEe-S5ZRQeQ48cw" name="giveCourseFeedback"/>
+    <ownedOperation xmi:type="uml:Operation" xmi:id="_B94hYAkmEe-S5ZRQeQ48cw" name="submitFee"/>
+    <ownedOperation xmi:type="uml:Operation" xmi:id="_i3MHQAt3Ee-pa64IpdH6Iw" name="isEnrolled"/>
+    <ownedOperation xmi:type="uml:Operation" xmi:id="_FRZ74At8Ee-pa64IpdH6Iw" name="coreCoursesTaken"/>
+    <ownedOperation xmi:type="uml:Operation" xmi:id="_OxHXkAt8Ee-pa64IpdH6Iw" name="electiveCourseTaken"/>
+    <ownedOperation xmi:type="uml:Operation" xmi:id="_TX60gAuFEe-pa64IpdH6Iw" name="repeatCourse"/>
+    <ownedOperation xmi:type="uml:Operation" xmi:id="_fo3E4AuJEe-pa64IpdH6Iw" name="viewWarningCount"/>
+    <ownedOperation xmi:type="uml:Operation" xmi:id="_BcrSwAuMEe-pa64IpdH6Iw" name="getApprovalForRegistration"/>
+    <ownedOperation xmi:type="uml:Operation" xmi:id="_0n0CsAuXEe-pa64IpdH6Iw" name="payFee "/>
+    <ownedOperation xmi:type="uml:Operation" xmi:id="_TJyFUAuaEe-pa64IpdH6Iw" name="getApprovalByHOD"/>
+    <ownedOperation xmi:type="uml:Operation" xmi:id="_egKHsAuaEe-pa64IpdH6Iw" name="canAppearInExam"/>
+    <ownedOperation xmi:type="uml:Operation" xmi:id="_wK3nMAugEe-pa64IpdH6Iw" name="applyForGradeChange"/>
+  </packagedElement>
+  <packagedElement xmi:type="uml:Class" xmi:id="_nupjcAkcEe-S5ZRQeQ48cw" name="Course">
+    <ownedAttribute xmi:type="uml:Property" xmi:id="_hcFKcAkiEe-S5ZRQeQ48cw" name="courseID" visibility="private" aggregation="shared">
+      <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+    </ownedAttribute>
+    <ownedAttribute xmi:type="uml:Property" xmi:id="_iDP4IAkiEe-S5ZRQeQ48cw" name="name" visibility="private">
+      <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+    </ownedAttribute>
+    <ownedAttribute xmi:type="uml:Property" xmi:id="_iXmXgAkiEe-S5ZRQeQ48cw" name="department" visibility="private">
+      <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+      <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_6PZTEAkiEe-S5ZRQeQ48cw" value="*"/>
+    </ownedAttribute>
+    <ownedAttribute xmi:type="uml:Property" xmi:id="_iv2fcAkiEe-S5ZRQeQ48cw" name="creditHours" visibility="private">
+      <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Integer"/>
+      <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_N7gRUAkjEe-S5ZRQeQ48cw" value="*"/>
+    </ownedAttribute>
+    <ownedAttribute xmi:type="uml:Property" xmi:id="_jFmF8AkiEe-S5ZRQeQ48cw" name="fee" visibility="private">
+      <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/EcorePrimitiveTypes.library.uml#EFloat"/>
+    </ownedAttribute>
+    <ownedAttribute xmi:type="uml:Property" xmi:id="_YGGb4At6Ee-pa64IpdH6Iw" name="courseType" visibility="private">
+      <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+    </ownedAttribute>
+    <ownedAttribute xmi:type="uml:Property" xmi:id="_a-pEYAt8Ee-pa64IpdH6Iw" name="isRequired" visibility="private" aggregation="shared">
+      <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Boolean"/>
+    </ownedAttribute>
+    <ownedAttribute xmi:type="uml:Property" xmi:id="_l9ID0At_Ee-pa64IpdH6Iw" name="prerequisites" visibility="private">
+      <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+    </ownedAttribute>
+    <ownedAttribute xmi:type="uml:Property" xmi:id="_LmX9EAuAEe-pa64IpdH6Iw" name="withdrawalDate" visibility="private">
+      <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/EcorePrimitiveTypes.library.uml#EDate"/>
+    </ownedAttribute>
+    <ownedAttribute xmi:type="uml:Property" xmi:id="_pd7mMAuBEe-pa64IpdH6Iw" name="status" visibility="private">
+      <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+    </ownedAttribute>
+    <ownedOperation xmi:type="uml:Operation" xmi:id="_3QdSMAkhEe-S5ZRQeQ48cw" name="viewCourseDetails"/>
+    <ownedOperation xmi:type="uml:Operation" xmi:id="_4uFHwAuHEe-pa64IpdH6Iw" name="ImproveCourseGrade"/>
+  </packagedElement>
+  <packagedElement xmi:type="uml:Class" xmi:id="_s0KrwAkcEe-S5ZRQeQ48cw" name="Registration">
+    <ownedAttribute xmi:type="uml:Property" xmi:id="_Xaq6cAkjEe-S5ZRQeQ48cw" name="registratinID" visibility="private">
+      <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+    </ownedAttribute>
+    <ownedAttribute xmi:type="uml:Property" xmi:id="_XvWxAAkjEe-S5ZRQeQ48cw" name="studentID" visibility="private">
+      <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+    </ownedAttribute>
+    <ownedAttribute xmi:type="uml:Property" xmi:id="_X_SDYAkjEe-S5ZRQeQ48cw" name="courseID" visibility="private">
+      <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+    </ownedAttribute>
+    <ownedAttribute xmi:type="uml:Property" xmi:id="_YRspEAkjEe-S5ZRQeQ48cw" name="registrationDate" visibility="private">
+      <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/EcorePrimitiveTypes.library.uml#EDate"/>
+    </ownedAttribute>
+    <ownedOperation xmi:type="uml:Operation" xmi:id="_4wycgAkhEe-S5ZRQeQ48cw" name="registerCourse"/>
+    <ownedOperation xmi:type="uml:Operation" xmi:id="_6SoCsAkhEe-S5ZRQeQ48cw" name="withdrawCourse"/>
+    <ownedOperation xmi:type="uml:Operation" xmi:id="_7V_kMAkhEe-S5ZRQeQ48cw" name="dropCourse"/>
+  </packagedElement>
+  <packagedElement xmi:type="uml:Class" xmi:id="_zOC-8AkcEe-S5ZRQeQ48cw" name="Transcript">
+    <ownedRule xmi:type="uml:Constraint" xmi:id="_elhoAApqEe-_z7ONgUI60A" name="WithdrawCourse_6">
+      <specification xmi:type="uml:OpaqueExpression" xmi:id="_eljdMApqEe-_z7ONgUI60A" name="constraintSpec">
+        <language>OCL</language>
+        <body>context Transcript&#xD;
+inv:&#xD;
+   course.status='withdrawn' implies self.grade='W''&#xD;
+</body>
+      </specification>
+    </ownedRule>
+    <ownedRule xmi:type="uml:Constraint" xmi:id="_MU10AApsEe-_z7ONgUI60A" name="DropCourse_8">
+      <specification xmi:type="uml:OpaqueExpression" xmi:id="_MU3CIApsEe-_z7ONgUI60A" name="constraintSpec">
+        <language>OCL</language>
+        <body>context Transcript&#xD;
+inv:&#xD;
+    self.courseID->forAll(course | not course.status='dropped'')</body>
+      </specification>
+    </ownedRule>
+    <ownedRule xmi:type="uml:Constraint" xmi:id="_ISU1kAuEEe-pa64IpdH6Iw" name="CGPACalculation_9">
+      <specification xmi:type="uml:OpaqueExpression" xmi:id="_ISWqwAuEEe-pa64IpdH6Iw" name="constraintSpec">
+        <language>OCL</language>
+        <body>context Transcript&#xD;
+student.semester->collect(semester | student.semester.GPA)->sum() / student.semester->size()</body>
+      </specification>
+    </ownedRule>
+    <ownedAttribute xmi:type="uml:Property" xmi:id="_txZr4AkjEe-S5ZRQeQ48cw" name="studentID" visibility="private">
+      <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+    </ownedAttribute>
+    <ownedAttribute xmi:type="uml:Property" xmi:id="_uJZVIAkjEe-S5ZRQeQ48cw" name="courseID" visibility="private">
+      <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+    </ownedAttribute>
+    <ownedAttribute xmi:type="uml:Property" xmi:id="_ucxkIAkjEe-S5ZRQeQ48cw" name="grade" visibility="private">
+      <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/EcorePrimitiveTypes.library.uml#EChar"/>
+      <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_2E-EkAkjEe-S5ZRQeQ48cw" value="*"/>
+    </ownedAttribute>
+    <ownedAttribute xmi:type="uml:Property" xmi:id="_pDwHcAuIEe-pa64IpdH6Iw" name="repeatCount" visibility="private">
+      <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Integer"/>
+    </ownedAttribute>
+    <ownedOperation xmi:type="uml:Operation" xmi:id="_CGyikAkiEe-S5ZRQeQ48cw" name="calculateGPA"/>
+  </packagedElement>
+  <packagedElement xmi:type="uml:Class" xmi:id="_24cNEAkcEe-S5ZRQeQ48cw" name="Fee">
+    <ownedRule xmi:type="uml:Constraint" xmi:id="_2yrXAAsDEe-5HOH-_imbQQ" name="FeeDate_21">
+      <specification xmi:type="uml:OpaqueExpression" xmi:id="_2yslIAsDEe-5HOH-_imbQQ" name="constraintSpec">
+        <language>OCL</language>
+        <body>context Fee&#xD;
+inv: &#xD;
+       self.dueDate = self.student.semester.startDate - 14</body>
+      </specification>
+    </ownedRule>
+    <ownedRule xmi:type="uml:Constraint" xmi:id="_4ahp4AuYEe-pa64IpdH6Iw" name="non_RefundableFee_23">
+      <specification xmi:type="uml:OpaqueExpression" xmi:id="_4ai4AAuYEe-pa64IpdH6Iw" name="constraintSpec">
+        <language>OCL</language>
+        <body>context Fee:&#xD;
+inv:&#xD;
+ isRefundable implies self.type = FeeType::SecurityDeposit </body>
+      </specification>
+    </ownedRule>
+    <ownedAttribute xmi:type="uml:Property" xmi:id="_JPLPoAkkEe-S5ZRQeQ48cw" name="studentID" visibility="private">
+      <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Integer"/>
+    </ownedAttribute>
+    <ownedAttribute xmi:type="uml:Property" xmi:id="_JeT30AkkEe-S5ZRQeQ48cw" name="amountDue" visibility="private">
+      <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/EcorePrimitiveTypes.library.uml#EFloat"/>
+    </ownedAttribute>
+    <ownedAttribute xmi:type="uml:Property" xmi:id="_PksKwAuWEe-pa64IpdH6Iw" name="dueDate" visibility="private" aggregation="composite">
+      <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/EcorePrimitiveTypes.library.uml#EDate"/>
+    </ownedAttribute>
+    <ownedAttribute xmi:type="uml:Property" xmi:id="_HanBEAudEe-pa64IpdH6Iw" name="type" visibility="private">
+      <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+    </ownedAttribute>
+    <ownedOperation xmi:type="uml:Operation" xmi:id="_LwY6EAkiEe-S5ZRQeQ48cw" name="viewFeeDetails"/>
+  </packagedElement>
+  <packagedElement xmi:type="uml:Class" xmi:id="_9HvA4AkcEe-S5ZRQeQ48cw" name="Loan">
+    <ownedRule xmi:type="uml:Constraint" xmi:id="_OPgN0AsEEe-5HOH-_imbQQ" name="IndigentStudents_25">
+      <specification xmi:type="uml:OpaqueExpression" xmi:id="_OPiDAAsEEe-5HOH-_imbQQ" name="constraintSpec">
+        <language>OCL</language>
+        <body>context Loan&#xD;
+inv:&#xD;
+self.student.isIndigent = true implies&#xD;
+  self.student.applyForLoan() = true</body>
+      </specification>
+    </ownedRule>
+    <ownedRule xmi:type="uml:Constraint" xmi:id="_3LSSwAucEe-pa64IpdH6Iw" name="ApplyForLoan26-31">
+      <specification xmi:type="uml:OpaqueExpression" xmi:id="_3LUH8AucEe-pa64IpdH6Iw" name="constraintSpec">
+        <language>OCL</language>
+        <body>context Loan&#xD;
+inv:&#xD;
+  &#xD;
+  self.loanAmount = self.student.fee='tuitionFee'&#xD;
+  &#xD;
+  if self.student.degreeType = 'Undergraduate' then&#xD;
+    self.student.CGPA >= 2.00&#xD;
+  else&#xD;
+    self.student.CGPA >= 2.5&#xD;
+  endif&#xD;
+  self.repaymentStart = min(self.student.graduationDate + (3.months) or self.student.employmentDate + (3.months))&#xD;
+  self.student.graduationDate + 4.years) >= self.repaymentStart&#xD;
+  self.student.applyForLoan() = true</body>
+      </specification>
+    </ownedRule>
+    <ownedAttribute xmi:type="uml:Property" xmi:id="_TgJwMAkkEe-S5ZRQeQ48cw" name="studentID" visibility="private">
+      <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+    </ownedAttribute>
+    <ownedAttribute xmi:type="uml:Property" xmi:id="_TvnIgAkkEe-S5ZRQeQ48cw" name="loanAmount" visibility="private">
+      <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/EcorePrimitiveTypes.library.uml#EFloat"/>
+    </ownedAttribute>
+    <ownedAttribute xmi:type="uml:Property" xmi:id="_UAhSUAkkEe-S5ZRQeQ48cw" name="repaymentStart" visibility="private">
+      <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/EcorePrimitiveTypes.library.uml#EDate"/>
+    </ownedAttribute>
+    <ownedAttribute xmi:type="uml:Property" xmi:id="_ek-g0AubEe-pa64IpdH6Iw" name="isIndigent" visibility="private" aggregation="composite">
+      <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Boolean"/>
+    </ownedAttribute>
+    <ownedOperation xmi:type="uml:Operation" xmi:id="_NCpMIAkiEe-S5ZRQeQ48cw" name="applyForLoan"/>
+    <ownedOperation xmi:type="uml:Operation" xmi:id="_OuEzMAkiEe-S5ZRQeQ48cw" name="renewLoan"/>
+    <ownedOperation xmi:type="uml:Operation" xmi:id="_S0X6MAkiEe-S5ZRQeQ48cw" name="discontinueLoan"/>
+  </packagedElement>
+  <packagedElement xmi:type="uml:Class" xmi:id="_-A9u8AkcEe-S5ZRQeQ48cw" name="Attendance">
+    <ownedRule xmi:type="uml:Constraint" xmi:id="_-OT3kAsCEe-5HOH-_imbQQ" name="viewAttendance_35">
+      <specification xmi:type="uml:OpaqueExpression" xmi:id="_-OVswAsCEe-5HOH-_imbQQ" name="constraintSpec">
+        <language>OCL</language>
+        <body>context Attendance&#xD;
+inv:&#xD;
+self.student.registered=true implies&#xD;
+  self.student.viewAttendance() = true</body>
+      </specification>
+    </ownedRule>
+    <ownedRule xmi:type="uml:Constraint" xmi:id="_GTJ3wAsDEe-5HOH-_imbQQ" name="EligibleForFinalExam_36">
+      <specification xmi:type="uml:OpaqueExpression" xmi:id="_GTLF4AsDEe-5HOH-_imbQQ" name="constraintSpec">
+        <language>OCL</language>
+        <body>context Attendance&#xD;
+inv:&#xD;
+  self.presencePercentage > 80 implies self.student.eligibleForFinal = true</body>
+      </specification>
+    </ownedRule>
+    <ownedAttribute xmi:type="uml:Property" xmi:id="_nVe74AkkEe-S5ZRQeQ48cw" name="studentID" visibility="private">
+      <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+    </ownedAttribute>
+    <ownedAttribute xmi:type="uml:Property" xmi:id="_nyWeEAkkEe-S5ZRQeQ48cw" name="courseID" visibility="private">
+      <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+    </ownedAttribute>
+    <ownedAttribute xmi:type="uml:Property" xmi:id="_oHYS4AkkEe-S5ZRQeQ48cw" name="attendancePercentage" visibility="private" aggregation="composite">
+      <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/EcorePrimitiveTypes.library.uml#EFloat"/>
+    </ownedAttribute>
+    <ownedAttribute xmi:type="uml:Property" xmi:id="_Cw91EAugEe-pa64IpdH6Iw" name="presencePercentage" visibility="private">
+      <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/EcorePrimitiveTypes.library.uml#EFloat"/>
+    </ownedAttribute>
+    <ownedOperation xmi:type="uml:Operation" xmi:id="_U_SSkAkiEe-S5ZRQeQ48cw" name="markAttendance"/>
+  </packagedElement>
+  <packagedElement xmi:type="uml:Class" xmi:id="__W6OMAkcEe-S5ZRQeQ48cw" name="Result">
+    <ownedRule xmi:type="uml:Constraint" xmi:id="_jFtIAAsBEe-5HOH-_imbQQ" name="ViewResult_37">
+      <specification xmi:type="uml:OpaqueExpression" xmi:id="_jFu9MAsBEe-5HOH-_imbQQ" name="constraintSpec">
+        <language>OCL</language>
+        <body>context Result&#xD;
+inv:&#xD;
+  self.student.viewResults() = true</body>
+      </specification>
+    </ownedRule>
+    <ownedRule xmi:type="uml:Constraint" xmi:id="_tHyQ8AsBEe-5HOH-_imbQQ" name="ChangeInGradeRequest_38">
+      <specification xmi:type="uml:OpaqueExpression" xmi:id="_tHzfEAsBEe-5HOH-_imbQQ" name="constraintSpec">
+        <language>OCL</language>
+        <body>context Result&#xD;
+inv :&#xD;
+  self.isAnnounced=true implies self.student.applyForGradeChange = true</body>
+      </specification>
+    </ownedRule>
+    <ownedRule xmi:type="uml:Constraint" xmi:id="_JXOiMAsCEe-5HOH-_imbQQ" name="RetakeExamApprovalByHOD_39">
+      <specification xmi:type="uml:OpaqueExpression" xmi:id="_JXPwUAsCEe-5HOH-_imbQQ" name="constraintSpec">
+        <language>OCL</language>
+        <body>context Result&#xD;
+ inv:&#xD;
+  self.student.requestExamRetake() implies self.approvedByHOD = true&#xD;
+</body>
+      </specification>
+    </ownedRule>
+    <ownedAttribute xmi:type="uml:Property" xmi:id="_Js_-oAklEe-S5ZRQeQ48cw" name="studentID" visibility="private">
+      <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+    </ownedAttribute>
+    <ownedAttribute xmi:type="uml:Property" xmi:id="_J8KcAAklEe-S5ZRQeQ48cw" name="courseID" visibility="private">
+      <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+    </ownedAttribute>
+    <ownedAttribute xmi:type="uml:Property" xmi:id="_KOx2AAklEe-S5ZRQeQ48cw" name="marks" visibility="private">
+      <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Integer"/>
+    </ownedAttribute>
+    <ownedAttribute xmi:type="uml:Property" xmi:id="_KhmrYAklEe-S5ZRQeQ48cw" name="grade" visibility="private">
+      <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/EcorePrimitiveTypes.library.uml#EChar"/>
+    </ownedAttribute>
+    <ownedAttribute xmi:type="uml:Property" xmi:id="__gUHcAsBEe-5HOH-_imbQQ" name="isAnnounced" visibility="private">
+      <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Boolean"/>
+    </ownedAttribute>
+    <ownedAttribute xmi:type="uml:Property" xmi:id="_ag9DQAsCEe-5HOH-_imbQQ" name="approvedbyHOD" visibility="private">
+      <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Boolean"/>
+    </ownedAttribute>
+    <ownedOperation xmi:type="uml:Operation" xmi:id="_XAul4AkiEe-S5ZRQeQ48cw" name="viewMarks"/>
+  </packagedElement>
+  <packagedElement xmi:type="uml:Class" xmi:id="_AdL5wAkdEe-S5ZRQeQ48cw" name="Scholarship">
+    <ownedRule xmi:type="uml:Constraint" xmi:id="_V-QesAsDEe-5HOH-_imbQQ" name="AwardToTopThreeInBoard_32">
+      <specification xmi:type="uml:OpaqueExpression" xmi:id="_V-Rs0AsDEe-5HOH-_imbQQ" name="constraintSpec">
+        <language>OCL</language>
+        <body>context Scholarship&#xD;
+inv AwardToTopThreeInBoard:&#xD;
+  self.student.boardPosition->notEmpty() and&#xD;
+  self.student.boardPosition &lt;= 3 implies&#xD;
+  self.type = 'Merit Scholarship'</body>
+      </specification>
+    </ownedRule>
+    <ownedRule xmi:type="uml:Constraint" xmi:id="_ZbASYAsDEe-5HOH-_imbQQ" name="AwardToTopThreeInNUList_33">
+      <specification xmi:type="uml:OpaqueExpression" xmi:id="_ZbBggAsDEe-5HOH-_imbQQ" name="constraintSpec">
+        <language>OCL</language>
+        <body>context Scholarship&#xD;
+inv AwardToTopThreeInNUList:&#xD;
+  self.student.admissionPosition->notEmpty() and&#xD;
+  self.student.admissionPosition &lt;= 3 implies&#xD;
+  self.type = 'NU Merit Scholarship'</body>
+      </specification>
+    </ownedRule>
+    <ownedAttribute xmi:type="uml:Property" xmi:id="_ZRr0gAklEe-S5ZRQeQ48cw" name="studentID" visibility="private">
+      <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+    </ownedAttribute>
+    <ownedAttribute xmi:type="uml:Property" xmi:id="_ZkQyQAklEe-S5ZRQeQ48cw" name="amount" visibility="private">
+      <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/EcorePrimitiveTypes.library.uml#EFloat"/>
+    </ownedAttribute>
+    <ownedAttribute xmi:type="uml:Property" xmi:id="_1AsRcAsCEe-5HOH-_imbQQ" name="type" visibility="private">
+      <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+    </ownedAttribute>
+    <ownedOperation xmi:type="uml:Operation" xmi:id="_asOAMAkiEe-S5ZRQeQ48cw" name="awardScholarship"/>
+  </packagedElement>
+  <packagedElement xmi:type="uml:Class" xmi:id="_GyHCMAkiEe-S5ZRQeQ48cw" name="Warning">
+    <ownedRule xmi:type="uml:Constraint" xmi:id="_zJOOMAptEe-_z7ONgUI60A" name="IssueWarning_15">
+      <specification xmi:type="uml:OpaqueExpression" xmi:id="_zJO1QAptEe-_z7ONgUI60A" name="constraintSpec">
+        <language>OCL</language>
+        <body>context Warning&#xD;
+inv:&#xD;
+    student.CGPA &lt; self.minimumCGPA implies self.IssueWarning()=true</body>
+      </specification>
+    </ownedRule>
+    <ownedAttribute xmi:type="uml:Property" xmi:id="_-nPnoAkjEe-S5ZRQeQ48cw" name="studentID" visibility="private" aggregation="composite">
+      <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+    </ownedAttribute>
+    <ownedAttribute xmi:type="uml:Property" xmi:id="_-8jJQAkjEe-S5ZRQeQ48cw" name="warningCount" visibility="private">
+      <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Integer"/>
+      <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_Fg8DUAkkEe-S5ZRQeQ48cw" value="*"/>
+    </ownedAttribute>
+    <ownedAttribute xmi:type="uml:Property" xmi:id="_UOyjYAuLEe-pa64IpdH6Iw" name="minimumCGPA" visibility="private">
+      <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/EcorePrimitiveTypes.library.uml#EFloat"/>
+    </ownedAttribute>
+    <ownedAttribute xmi:type="uml:Property" xmi:id="_puQ1UAuOEe-pa64IpdH6Iw" name="maxNoOfYears" visibility="private">
+      <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Integer"/>
+    </ownedAttribute>
+    <ownedOperation xmi:type="uml:Operation" xmi:id="_KaCyMAkiEe-S5ZRQeQ48cw" name="issueWarning"/>
+  </packagedElement>
+  <packagedElement xmi:type="uml:Class" xmi:id="_Ozm2oAkmEe-S5ZRQeQ48cw" name="Department" visibility="public">
+    <ownedAttribute xmi:type="uml:Property" xmi:id="_UGFc4AkmEe-S5ZRQeQ48cw" name="departmentID" visibility="private">
+      <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+    </ownedAttribute>
+    <ownedAttribute xmi:type="uml:Property" xmi:id="_Ub-0YAkmEe-S5ZRQeQ48cw" name="name" visibility="private">
+      <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+    </ownedAttribute>
+  </packagedElement>
+  <packagedElement xmi:type="uml:Class" xmi:id="_SK_CIAkmEe-S5ZRQeQ48cw" name="Semester">
+    <ownedRule xmi:type="uml:Constraint" xmi:id="_ornZIApoEe-_z7ONgUI60A" name="SemesterType_2">
+      <specification xmi:type="uml:OpaqueExpression" xmi:id="_orut4ApoEe-_z7ONgUI60A" name="constraintSpec">
+        <language>OCL</language>
+        <body>context Semester&#xD;
+inv:&#xD;
+    self.name = 'Fall' or self.name = 'Spring' or self.name = 'Summer'</body>
+      </specification>
+    </ownedRule>
+    <ownedAttribute xmi:type="uml:Property" xmi:id="_VAt5IAkmEe-S5ZRQeQ48cw" name="semesterID" visibility="private">
+      <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+    </ownedAttribute>
+    <ownedAttribute xmi:type="uml:Property" xmi:id="_VV434AkmEe-S5ZRQeQ48cw" name="name" visibility="private">
+      <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+    </ownedAttribute>
+    <ownedAttribute xmi:type="uml:Property" xmi:id="_PMdWIAuEEe-pa64IpdH6Iw" name="GPA" visibility="package" aggregation="composite">
+      <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/EcorePrimitiveTypes.library.uml#EFloat"/>
+    </ownedAttribute>
+    <ownedAttribute xmi:type="uml:Property" xmi:id="_TPN7wAuWEe-pa64IpdH6Iw" name="startDate" visibility="private">
+      <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/EcorePrimitiveTypes.library.uml#EDate"/>
+    </ownedAttribute>
+  </packagedElement>
+  <packagedElement xmi:type="uml:Association" xmi:id="_VU5j8AknEe-S5ZRQeQ48cw" memberEnd="_VU7ZIAknEe-S5ZRQeQ48cw _VU8AMAknEe-S5ZRQeQ48cw">
+    <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_VU6yEAknEe-S5ZRQeQ48cw" source="org.eclipse.papyrus">
+      <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_VU6yEQknEe-S5ZRQeQ48cw" key="nature" value="UML_Nature"/>
+    </eAnnotations>
+    <ownedEnd xmi:type="uml:Property" xmi:id="_VU8AMAknEe-S5ZRQeQ48cw" name="student" type="_fl1CMAkcEe-S5ZRQeQ48cw" association="_VU5j8AknEe-S5ZRQeQ48cw">
+      <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_Y2VqYAknEe-S5ZRQeQ48cw" value="*"/>
+    </ownedEnd>
+    <ownedEnd xmi:type="uml:Property" xmi:id="_VU7ZIAknEe-S5ZRQeQ48cw" name="course" type="_nupjcAkcEe-S5ZRQeQ48cw" association="_VU5j8AknEe-S5ZRQeQ48cw">
+      <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_boC9AAknEe-S5ZRQeQ48cw" value="*"/>
+    </ownedEnd>
+  </packagedElement>
+  <packagedElement xmi:type="uml:Association" xmi:id="_xUolQAknEe-S5ZRQeQ48cw" visibility="package" memberEnd="_xUpMUgknEe-S5ZRQeQ48cw _xUqacAknEe-S5ZRQeQ48cw">
+    <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_xUpMUAknEe-S5ZRQeQ48cw" source="org.eclipse.papyrus">
+      <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_xUpMUQknEe-S5ZRQeQ48cw" key="nature" value="UML_Nature"/>
+    </eAnnotations>
+    <ownedEnd xmi:type="uml:Property" xmi:id="_xUqacAknEe-S5ZRQeQ48cw" name="student" type="_fl1CMAkcEe-S5ZRQeQ48cw" association="_xUolQAknEe-S5ZRQeQ48cw"/>
+    <ownedEnd xmi:type="uml:Property" xmi:id="_xUpMUgknEe-S5ZRQeQ48cw" name="fee" type="_24cNEAkcEe-S5ZRQeQ48cw" association="_xUolQAknEe-S5ZRQeQ48cw">
+      <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_5itZ8AknEe-S5ZRQeQ48cw" value="*"/>
+    </ownedEnd>
+  </packagedElement>
+  <packagedElement xmi:type="uml:Association" xmi:id="_IbMRIAkoEe-S5ZRQeQ48cw" memberEnd="_IbOGUQkoEe-S5ZRQeQ48cw _IbOtYAkoEe-S5ZRQeQ48cw">
+    <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_IbNfQAkoEe-S5ZRQeQ48cw" source="org.eclipse.papyrus">
+      <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_IbOGUAkoEe-S5ZRQeQ48cw" key="nature" value="UML_Nature"/>
+    </eAnnotations>
+    <ownedEnd xmi:type="uml:Property" xmi:id="_IbOGUQkoEe-S5ZRQeQ48cw" name="attendance" type="_-A9u8AkcEe-S5ZRQeQ48cw" association="_IbMRIAkoEe-S5ZRQeQ48cw"/>
+    <ownedEnd xmi:type="uml:Property" xmi:id="_IbOtYAkoEe-S5ZRQeQ48cw" name="student" type="_fl1CMAkcEe-S5ZRQeQ48cw" association="_IbMRIAkoEe-S5ZRQeQ48cw"/>
+  </packagedElement>
+  <packagedElement xmi:type="uml:Association" xmi:id="_QR0PIAkoEe-S5ZRQeQ48cw" memberEnd="_QR02MQkoEe-S5ZRQeQ48cw _QR1dQAkoEe-S5ZRQeQ48cw">
+    <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_QR0PIQkoEe-S5ZRQeQ48cw" source="org.eclipse.papyrus">
+      <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_QR02MAkoEe-S5ZRQeQ48cw" key="nature" value="UML_Nature"/>
+    </eAnnotations>
+    <ownedEnd xmi:type="uml:Property" xmi:id="_QR02MQkoEe-S5ZRQeQ48cw" name="transcript" type="_zOC-8AkcEe-S5ZRQeQ48cw" association="_QR0PIAkoEe-S5ZRQeQ48cw"/>
+    <ownedEnd xmi:type="uml:Property" xmi:id="_QR1dQAkoEe-S5ZRQeQ48cw" name="student" type="_fl1CMAkcEe-S5ZRQeQ48cw" association="_QR0PIAkoEe-S5ZRQeQ48cw"/>
+  </packagedElement>
+  <packagedElement xmi:type="uml:Association" xmi:id="_XhdssAkoEe-S5ZRQeQ48cw" memberEnd="_Xhe60AkoEe-S5ZRQeQ48cw _Xhfh4AkoEe-S5ZRQeQ48cw">
+    <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_XheTwAkoEe-S5ZRQeQ48cw" source="org.eclipse.papyrus">
+      <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_XheTwQkoEe-S5ZRQeQ48cw" key="nature" value="UML_Nature"/>
+    </eAnnotations>
+    <ownedEnd xmi:type="uml:Property" xmi:id="_Xhfh4AkoEe-S5ZRQeQ48cw" name="student" type="_fl1CMAkcEe-S5ZRQeQ48cw" association="_XhdssAkoEe-S5ZRQeQ48cw"/>
+    <ownedEnd xmi:type="uml:Property" xmi:id="_Xhe60AkoEe-S5ZRQeQ48cw" name="warning" type="_GyHCMAkiEe-S5ZRQeQ48cw" association="_XhdssAkoEe-S5ZRQeQ48cw">
+      <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_fgcVcAkoEe-S5ZRQeQ48cw" value="*"/>
+    </ownedEnd>
+  </packagedElement>
+  <packagedElement xmi:type="uml:Association" xmi:id="_r7VI0AkoEe-S5ZRQeQ48cw" memberEnd="_r7WW8gkoEe-S5ZRQeQ48cw _r7XlEAkoEe-S5ZRQeQ48cw">
+    <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_r7WW8AkoEe-S5ZRQeQ48cw" source="org.eclipse.papyrus">
+      <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_r7WW8QkoEe-S5ZRQeQ48cw" key="nature" value="UML_Nature"/>
+    </eAnnotations>
+    <ownedEnd xmi:type="uml:Property" xmi:id="_r7XlEAkoEe-S5ZRQeQ48cw" name="student" type="_fl1CMAkcEe-S5ZRQeQ48cw" association="_r7VI0AkoEe-S5ZRQeQ48cw">
+      <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_vzr6cAkoEe-S5ZRQeQ48cw" value="*"/>
+    </ownedEnd>
+    <ownedEnd xmi:type="uml:Property" xmi:id="_r7WW8gkoEe-S5ZRQeQ48cw" name="scholarship" type="_AdL5wAkdEe-S5ZRQeQ48cw" association="_r7VI0AkoEe-S5ZRQeQ48cw"/>
+  </packagedElement>
+  <packagedElement xmi:type="uml:Association" xmi:id="_3p9TIAkoEe-S5ZRQeQ48cw" memberEnd="_3p-hQAkoEe-S5ZRQeQ48cw _3p-hQQkoEe-S5ZRQeQ48cw">
+    <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_3p96MAkoEe-S5ZRQeQ48cw" source="org.eclipse.papyrus">
+      <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_3p96MQkoEe-S5ZRQeQ48cw" key="nature" value="UML_Nature"/>
+    </eAnnotations>
+    <ownedEnd xmi:type="uml:Property" xmi:id="_3p-hQAkoEe-S5ZRQeQ48cw" name="loan" type="_9HvA4AkcEe-S5ZRQeQ48cw" association="_3p9TIAkoEe-S5ZRQeQ48cw"/>
+    <ownedEnd xmi:type="uml:Property" xmi:id="_3p-hQQkoEe-S5ZRQeQ48cw" name="student" type="_fl1CMAkcEe-S5ZRQeQ48cw" association="_3p9TIAkoEe-S5ZRQeQ48cw">
+      <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_6_qqsAkoEe-S5ZRQeQ48cw" value="*"/>
+    </ownedEnd>
+  </packagedElement>
+  <packagedElement xmi:type="uml:Association" xmi:id="__gw3UAkoEe-S5ZRQeQ48cw" memberEnd="__gxeYgkoEe-S5ZRQeQ48cw __gyFcAkoEe-S5ZRQeQ48cw">
+    <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="__gxeYAkoEe-S5ZRQeQ48cw" source="org.eclipse.papyrus">
+      <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="__gxeYQkoEe-S5ZRQeQ48cw" key="nature" value="UML_Nature"/>
+    </eAnnotations>
+    <ownedEnd xmi:type="uml:Property" xmi:id="__gxeYgkoEe-S5ZRQeQ48cw" name="registration" type="_s0KrwAkcEe-S5ZRQeQ48cw" association="__gw3UAkoEe-S5ZRQeQ48cw"/>
+    <ownedEnd xmi:type="uml:Property" xmi:id="__gyFcAkoEe-S5ZRQeQ48cw" name="student" type="_fl1CMAkcEe-S5ZRQeQ48cw" association="__gw3UAkoEe-S5ZRQeQ48cw"/>
+  </packagedElement>
+  <packagedElement xmi:type="uml:Association" xmi:id="_TxNRsAkpEe-S5ZRQeQ48cw" memberEnd="_TxPG4AkpEe-S5ZRQeQ48cw _TxPt8AkpEe-S5ZRQeQ48cw">
+    <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_TxOf0AkpEe-S5ZRQeQ48cw" source="org.eclipse.papyrus">
+      <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_TxOf0QkpEe-S5ZRQeQ48cw" key="nature" value="UML_Nature"/>
+    </eAnnotations>
+    <ownedEnd xmi:type="uml:Property" xmi:id="_TxPG4AkpEe-S5ZRQeQ48cw" name="student" type="_fl1CMAkcEe-S5ZRQeQ48cw" association="_TxNRsAkpEe-S5ZRQeQ48cw"/>
+    <ownedEnd xmi:type="uml:Property" xmi:id="_TxPt8AkpEe-S5ZRQeQ48cw" name="result" type="__W6OMAkcEe-S5ZRQeQ48cw" association="_TxNRsAkpEe-S5ZRQeQ48cw"/>
+  </packagedElement>
+  <packagedElement xmi:type="uml:Association" xmi:id="_niN-EAkpEe-S5ZRQeQ48cw" memberEnd="_niPMMgkpEe-S5ZRQeQ48cw _niQaUAkpEe-S5ZRQeQ48cw">
+    <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_niPMMAkpEe-S5ZRQeQ48cw" source="org.eclipse.papyrus">
+      <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_niPMMQkpEe-S5ZRQeQ48cw" key="nature" value="UML_Nature"/>
+    </eAnnotations>
+    <ownedEnd xmi:type="uml:Property" xmi:id="_niQaUAkpEe-S5ZRQeQ48cw" name="department" type="_Ozm2oAkmEe-S5ZRQeQ48cw" association="_niN-EAkpEe-S5ZRQeQ48cw"/>
+    <ownedEnd xmi:type="uml:Property" xmi:id="_niPMMgkpEe-S5ZRQeQ48cw" name="student" type="_fl1CMAkcEe-S5ZRQeQ48cw" association="_niN-EAkpEe-S5ZRQeQ48cw"/>
+  </packagedElement>
+  <packagedElement xmi:type="uml:Association" xmi:id="_2lSUoAkpEe-S5ZRQeQ48cw" memberEnd="_2lTiwgkpEe-S5ZRQeQ48cw _2lX0MAkpEe-S5ZRQeQ48cw">
+    <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_2lTiwAkpEe-S5ZRQeQ48cw" source="org.eclipse.papyrus">
+      <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_2lTiwQkpEe-S5ZRQeQ48cw" key="nature" value="UML_Nature"/>
+    </eAnnotations>
+    <ownedEnd xmi:type="uml:Property" xmi:id="_2lTiwgkpEe-S5ZRQeQ48cw" name="student" type="_fl1CMAkcEe-S5ZRQeQ48cw" association="_2lSUoAkpEe-S5ZRQeQ48cw"/>
+    <ownedEnd xmi:type="uml:Property" xmi:id="_2lX0MAkpEe-S5ZRQeQ48cw" name="semester" type="_SK_CIAkmEe-S5ZRQeQ48cw" association="_2lSUoAkpEe-S5ZRQeQ48cw"/>
+  </packagedElement>
+  <packagedElement xmi:type="uml:Association" xmi:id="_BExUoAuCEe-pa64IpdH6Iw" memberEnd="_BEzw4AuCEe-pa64IpdH6Iw _BE0X8QuCEe-pa64IpdH6Iw">
+    <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_BEzJ0AuCEe-pa64IpdH6Iw" source="org.eclipse.papyrus">
+      <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_BEzJ0QuCEe-pa64IpdH6Iw" key="nature" value="UML_Nature"/>
+    </eAnnotations>
+    <ownedEnd xmi:type="uml:Property" xmi:id="_BE0X8QuCEe-pa64IpdH6Iw" name="transcript" type="_zOC-8AkcEe-S5ZRQeQ48cw" association="_BExUoAuCEe-pa64IpdH6Iw"/>
+    <ownedEnd xmi:type="uml:Property" xmi:id="_BEzw4AuCEe-pa64IpdH6Iw" name="course" type="_nupjcAkcEe-S5ZRQeQ48cw" association="_BExUoAuCEe-pa64IpdH6Iw">
+      <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_BEzw4QuCEe-pa64IpdH6Iw"/>
+      <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_BE0X8AuCEe-pa64IpdH6Iw" value="1"/>
+    </ownedEnd>
+  </packagedElement>
+  <packagedElement xmi:type="uml:Class" xmi:id="_qE-ykAuWEe-pa64IpdH6Iw" name="Accounts_Office">
+    <ownedOperation xmi:type="uml:Operation" xmi:id="_j38zIAuXEe-pa64IpdH6Iw" name="issueBankChallan"/>
+  </packagedElement>
+  <packagedElement xmi:type="uml:Association" xmi:id="_9gbeoAuWEe-pa64IpdH6Iw" memberEnd="_9gcswguWEe-pa64IpdH6Iw _9gdT0QuWEe-pa64IpdH6Iw">
+    <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_9gcswAuWEe-pa64IpdH6Iw" source="org.eclipse.papyrus">
+      <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_9gcswQuWEe-pa64IpdH6Iw" key="nature" value="UML_Nature"/>
+    </eAnnotations>
+    <ownedEnd xmi:type="uml:Property" xmi:id="_9gdT0QuWEe-pa64IpdH6Iw" name="fee" type="_24cNEAkcEe-S5ZRQeQ48cw" association="_9gbeoAuWEe-pa64IpdH6Iw">
+      <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_D1CQQAuXEe-pa64IpdH6Iw" value="*"/>
+    </ownedEnd>
+    <ownedEnd xmi:type="uml:Property" xmi:id="_9gcswguWEe-pa64IpdH6Iw" name="accounts_office" type="_qE-ykAuWEe-pa64IpdH6Iw" association="_9gbeoAuWEe-pa64IpdH6Iw"/>
+  </packagedElement>
+  <packagedElement xmi:type="uml:Class" xmi:id="_XO7FwAxKEe-X-_u1oSBeJw" name="BS">
+    <generalization xmi:type="uml:Generalization" xmi:id="_ejvXMAxKEe-X-_u1oSBeJw" general="_fl1CMAkcEe-S5ZRQeQ48cw"/>
+    <ownedAttribute xmi:type="uml:Property" xmi:id="_t-J2wAxKEe-X-_u1oSBeJw" name="noOfYears" visibility="private">
+      <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Integer"/>
+    </ownedAttribute>
+  </packagedElement>
+  <packagedElement xmi:type="uml:Class" xmi:id="_X3kaIAxKEe-X-_u1oSBeJw" name="MS">
+    <generalization xmi:type="uml:Generalization" xmi:id="_gj_XsAxKEe-X-_u1oSBeJw" general="_fl1CMAkcEe-S5ZRQeQ48cw"/>
+    <ownedAttribute xmi:type="uml:Property" xmi:id="_qCEbsAxKEe-X-_u1oSBeJw" name="noOfYears" visibility="private" aggregation="shared">
+      <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Integer"/>
+    </ownedAttribute>
+  </packagedElement>
+</uml:Model>
